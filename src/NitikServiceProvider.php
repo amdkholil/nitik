@@ -27,6 +27,19 @@ class NitikServiceProvider extends PackageServiceProvider
             ]);
     }
 
+    public function packageBooted(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../config/nitik.php' => config_path('nitik.php'),
+            ], 'nitik');
+
+            $this->publishes([
+                __DIR__ . '/../database/migrations/create_nitik_errors_table.php' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_nitik_errors_table.php'),
+            ], 'nitik');
+        }
+    }
+
     public function packageRegistered(): void
     {
         $this->app->make('log')->extend('nitik', function ($app, array $config) {

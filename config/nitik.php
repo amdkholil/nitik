@@ -36,4 +36,15 @@ return [
     |
     */
     'table_prefix' => 'nitik_',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation Group
+    |--------------------------------------------------------------------------
+    |
+    | The navigation group label for Filament resource.
+    | Set to null to disable grouping.
+    |
+    */
+    'navigation_group' => null,
 ];

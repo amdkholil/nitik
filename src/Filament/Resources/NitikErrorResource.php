@@ -30,8 +30,6 @@ class NitikErrorResource extends Resource
 
     protected static ?string $navigationLabel = 'Error Tracker';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Nitik';
-
     protected static ?string $slug = 'nitik/errors';
 
     public static function table(Table $table): Table
@@ -126,5 +124,10 @@ class NitikErrorResource extends Resource
             'index' => Pages\ListNitikErrors::route('/'),
             'view' => Pages\ViewNitikError::route('/{record}'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return config('nitik.navigation_group');
     }
 }

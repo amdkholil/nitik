@@ -26,10 +26,10 @@ php artisan migrate
 
 ## Configuration
 
-### 1. Publish Config
+### 1. Publish Config and Migrations
 
 ```bash
-php artisan vendor:publish --tag=nitik-config
+php artisan vendor:publish --tag=nitik
 ```
 
 ### 2. Add Log Channel
@@ -91,6 +91,7 @@ Edit `config/nitik.php` to customize behavior:
 
 - `log_levels`: Array of levels (e.g., `error`, `critical`) to capture.
 - `ignore_exceptions`: List of exception classes to skip (e.g., `NotFoundHttpException`).
+- `navigation_group`: Label for Filament navigation grouping (default: `null`).
 
 ## License
 
