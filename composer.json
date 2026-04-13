@@ -9,12 +9,12 @@
         "log-driver",
         "filament"
     ],
-    "homepage": "https://github.com/kholil/nitik",
+    "homepage": "https://github.com/amdkholil/nitik",
     "license": "MIT",
     "authors": [
         {
             "name": "Kholil",
-            "email": "kholil@example.com",
+            "email": "amdkholil@gmail.com",
             "role": "Developer"
         }
     ],
@@ -51,6 +51,6 @@
     "config": {
         "sort-packages": true
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
