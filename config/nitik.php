@@ -47,4 +47,15 @@ return [
     |
     */
     'navigation_group' => null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation Label & Icon
+    |--------------------------------------------------------------------------
+    |
+    | Custom label and icon for the Filament resource menu.
+    |
+    */
+    'navigation_label' => 'Error Tracker',
+    'navigation_icon' => 'heroicon-o-bug-ant',
 ];

@@ -26,11 +26,17 @@ class NitikErrorResource extends Resource
 {
     protected static ?string $model = NitikError::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-bug-ant';
-
-    protected static ?string $navigationLabel = 'Error Tracker';
-
     protected static ?string $slug = 'nitik/errors';
+
+    public static function getNavigationLabel(): string
+    {
+        return config('nitik.navigation_label', 'Error Tracker');
+    }
+
+    public static function getNavigationIcon(): string|BackedEnum|null
+    {
+        return config('nitik.navigation_icon', 'heroicon-o-bug-ant');
+    }
 
     public static function table(Table $table): Table
     {
@@ -69,7 +75,11 @@ class NitikErrorResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\ToggleColumn::make('is_resolved')
-                    ->label('Resolved'),
+                    ->label('Resolved')
+                    ->afterStateUpdated(function (\Livewire\Component $livewire) {
+                        $livewire->dispatch('$refresh');
+                        $livewire->dispatch('refresh-sidebar');
+                    }),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('level')
@@ -79,9 +89,6 @@ class NitikErrorResource extends Resource
                         'EMERGENCY' => 'Emergency',
                         'WARNING' => 'Warning',
                     ]),
-                Tables\Filters\TernaryFilter::make('is_resolved')
-                    ->label('Resolved')
-                    ->default(false),
             ])
             ->actions([
                 ActionGroup::make([
@@ -91,8 +98,16 @@ class NitikErrorResource extends Resource
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(fn (NitikError $record) => $record->update(['is_resolved' => true]))
+                        ->after(function (\Livewire\Component $livewire) {
+                            $livewire->dispatch('$refresh');
+                            $livewire->dispatch('refresh-sidebar');
+                        })
                         ->visible(fn (NitikError $record) => !$record->is_resolved),
-                    DeleteAction::make(),
+                    DeleteAction::make()
+                        ->after(function (\Livewire\Component $livewire) {
+                            $livewire->dispatch('$refresh');
+                            $livewire->dispatch('refresh-sidebar');
+                        }),
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')
                 ->tooltip('Actions'),
@@ -103,8 +118,16 @@ class NitikErrorResource extends Resource
                         ->label('Mark Resolved')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->action(fn (Collection $records) => $records->each->update(['is_resolved' => true])),
-                    DeleteBulkAction::make(),
+                        ->action(fn (Collection $records) => $records->each->update(['is_resolved' => true]))
+                        ->after(function (\Livewire\Component $livewire) {
+                            $livewire->dispatch('$refresh');
+                            $livewire->dispatch('refresh-sidebar');
+                        }),
+                    DeleteBulkAction::make()
+                        ->after(function (\Livewire\Component $livewire) {
+                            $livewire->dispatch('$refresh');
+                            $livewire->dispatch('refresh-sidebar');
+                        }),
                 ]),
             ])
             ->recordUrl(fn ($record) => Pages\ViewNitikError::getUrl(['record' => $record]))
@@ -129,5 +152,15 @@ class NitikErrorResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return config('nitik.navigation_group');
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('is_resolved', false)->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return static::getModel()::where('is_resolved', false)->exists() ? 'danger' : null;
     }
 }
