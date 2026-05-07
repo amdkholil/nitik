@@ -30,10 +30,23 @@ class NitikErrorLevelStats extends BaseWidget
             }
         }
 
+        $unresolvedLevels = NitikError::query()
+            ->where('is_resolved', false)
+            ->selectRaw('level, count(*) as total')
+            ->groupBy('level')
+            ->pluck('total', 'level')
+            ->mapWithKeys(fn ($count, $level) => [strtolower($level) => $count])
+            ->toArray();
+
         $stats = [];
         foreach ($levels as $level => $config) {
+            $unresolvedCount = $unresolvedLevels[$level] ?? 0;
+            $description = $unresolvedCount > 0 
+                ? "{$unresolvedCount} unresolved" 
+                : 'All solved';
+
             $stats[] = Stat::make(ucfirst($level), $dbLevels[$level] ?? 0)
-                ->description(ucfirst($level))
+                ->description($description)
                 ->descriptionIcon($config['icon'])
                 ->color($config['color'])
                 ->icon($config['icon']);
