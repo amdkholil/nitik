@@ -31,3 +31,19 @@ it('does not capture ignored levels', function () {
 
     expect(NitikError::count())->toBe(0);
 });
+
+it('scrubs sensitive values from logs and stack traces', function () {
+    // Test helper directly
+    $dirtyTrace = "some_function('my-secret-token')\n/path/to/file.php: password=secret_password";
+    $cleanTrace = \Kholil\Nitik\Services\NitikNormalizer::sanitize($dirtyTrace);
+    expect($cleanTrace)->toContain('password=********');
+    expect($cleanTrace)->not->toContain('secret_password');
+
+    Log::channel('nitik')->error('Failed login attempt for password="secret_password" and key=secret_key');
+
+    expect(NitikError::count())->toBe(1);
+    
+    $error = NitikError::first();
+    expect($error->message)->toContain('password="********"');
+    expect($error->message)->toContain('key=********');
+});

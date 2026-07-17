@@ -89,11 +89,11 @@ class NitikLogHandler extends AbstractProcessingHandler
             $data = [
                 'hash' => $hash,
                 'level' => $record->level->getName(),
-                'message' => $normalizedMessage,
+                'message' => NitikNormalizer::sanitize($normalizedMessage),
                 'exception_class' => $exceptionClass,
                 'file' => $file,
                 'line' => $line,
-                'stack_trace' => $trace,
+                'stack_trace' => NitikNormalizer::sanitize($trace),
             ];
 
             NitikError::createOrAggregate($data);
