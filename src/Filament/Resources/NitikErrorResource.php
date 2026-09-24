@@ -115,15 +115,27 @@ class NitikErrorResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('markResolvedBulk')
-                        ->label('Mark Resolved')
+                        ->label('Mark Selected as Resolved')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->action(fn (Collection $records) => $records->each->update(['is_resolved' => true]))
+                        ->deselectRecordsAfterCompletion()
+                        ->after(function (\Livewire\Component $livewire) {
+                            $livewire->dispatch('$refresh');
+                            $livewire->dispatch('refresh-sidebar');
+                        }),
+                    BulkAction::make('markUnresolvedBulk')
+                        ->label('Mark Selected as Unresolved')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('warning')
+                        ->action(fn (Collection $records) => $records->each->update(['is_resolved' => false]))
+                        ->deselectRecordsAfterCompletion()
                         ->after(function (\Livewire\Component $livewire) {
                             $livewire->dispatch('$refresh');
                             $livewire->dispatch('refresh-sidebar');
                         }),
                     DeleteBulkAction::make()
+                        ->deselectRecordsAfterCompletion()
                         ->after(function (\Livewire\Component $livewire) {
                             $livewire->dispatch('$refresh');
                             $livewire->dispatch('refresh-sidebar');

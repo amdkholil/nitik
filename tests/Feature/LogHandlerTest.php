@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Kholil\Nitik\Mail\NitikErrorMail;
 use Kholil\Nitik\Models\NitikError;
 
 it('captures errors and saves to database', function () {
@@ -46,4 +49,39 @@ it('scrubs sensitive values from logs and stack traces', function () {
     $error = NitikError::first();
     expect($error->message)->toContain('password="********"');
     expect($error->message)->toContain('key=********');
+});
+
+it('can update is_resolved status in bulk', function () {
+    $now = now();
+    $err1 = NitikError::create(['hash' => 'h1', 'message' => 'm1', 'level' => 'ERROR', 'first_seen_at' => $now, 'last_seen_at' => $now, 'is_resolved' => false]);
+    $err2 = NitikError::create(['hash' => 'h2', 'message' => 'm2', 'level' => 'ERROR', 'first_seen_at' => $now, 'last_seen_at' => $now, 'is_resolved' => false]);
+
+    NitikError::whereIn('id', [$err1->id, $err2->id])->update(['is_resolved' => true]);
+    expect(NitikError::where('is_resolved', true)->count())->toBe(2);
+
+    NitikError::whereIn('id', [$err1->id, $err2->id])->update(['is_resolved' => false]);
+    expect(NitikError::where('is_resolved', false)->count())->toBe(2);
+});
+
+it('sends email and discord notifications when enabled', function () {
+    Mail::fake();
+    Http::fake();
+
+    config([
+        'nitik.notifications.enabled' => true,
+        'nitik.notifications.channels.mail.enabled' => true,
+        'nitik.notifications.channels.mail.to' => 'test@example.com',
+        'nitik.notifications.channels.discord.enabled' => true,
+        'nitik.notifications.channels.discord.webhook_url' => 'https://discord.com/api/webhooks/123/abc',
+    ]);
+
+    Log::channel('nitik')->error('Notified Error');
+
+    Mail::assertSent(NitikErrorMail::class, function ($mail) {
+        return $mail->hasTo('test@example.com');
+    });
+
+    Http::assertSent(function ($request) {
+        return $request->url() === 'https://discord.com/api/webhooks/123/abc';
+    });
 });

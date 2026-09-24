@@ -43,13 +43,17 @@ class NitikError extends Model
                 'last_seen_at' => Carbon::now(),
                 'is_resolved' => false, // Re-open if it was resolved
             ]);
+
+            \Kholil\Nitik\Services\NitikNotifier::send($error, isNew: false);
         } else {
-            static::create(array_merge($data, [
+            $error = static::create(array_merge($data, [
                 'count' => 1,
                 'first_seen_at' => Carbon::now(),
                 'last_seen_at' => Carbon::now(),
                 'is_resolved' => false,
             ]));
+
+            \Kholil\Nitik\Services\NitikNotifier::send($error, isNew: true);
         }
     }
 }
